@@ -22,10 +22,10 @@ background = pygame.image.load("bg.png").convert_alpha()
 
 #Font
 text_font = pygame.font.Font(None, 50)
-start_game_text_surf = text_font.render("Click To Start", False, "Red")
+start_game_text_surf = text_font.render("Press Space To Start", False, "Red")
 start_game_text_rect = start_game_text_surf.get_rect(center=(config["screen_width"]/2, (config["screen_height"]/2)-25))
 
-end_game_text_surf = text_font.render("Game Over", False, "Red")
+end_game_text_surf = text_font.render("Game Over!! Press Space to Start Again", False, "Red")
 end_game_text_rect = end_game_text_surf.get_rect(center=(config["screen_width"]/2, (config["screen_height"]/2)-25))
 
 #bird
@@ -78,6 +78,8 @@ pipe_q = []
 bird_y_pos = 50
 bird_rot = 0
 
+score = 0
+
 game_start = False
 while True:
     for event in pygame.event.get():
@@ -119,27 +121,29 @@ def did_collide(pipe_q, bird_rect):
         return True
     return False
 
+gravity = 0
 
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        key =  pygame.key.get_pressed()
-        if key[pygame.K_SPACE]:
-            print("Clicked")
-            if bird_rot < 45:
-                bird_rot += 30
-            bird_rect.centery -= 50
         if event.type == CREATEEVENT:
             pipe_q.append(pipeSet())
             if pipe_q[0].out == True:
                 pipe_q.pop()
-    
-    bird_rect.centery += 3
+    key =  pygame.key.get_pressed()
+    if key[pygame.K_SPACE]:
+        gravity = 0
+        if bird_rot < 25:
+            bird_rot += 20
+        bird_rect.centery -= 10
+    else:
+        bird_rect.centery += gravity/7
+    gravity+=1.5
     screen.blit(background,(0,0))
     screen.blit(pygame.transform.rotate(bird_surf, bird_rot), bird_rect)
-    if bird_rot > -45:
+    if bird_rot > -20:
         bird_rot -= 1
     exited_index = -1
     for pipe_num in range(len(pipe_q)):
@@ -165,11 +169,11 @@ while True:
                     pygame.quit()
                     exit()
 
-                if event.type == pygame.MOUSEBUTTONUP:
+                key =  pygame.key.get_pressed()
+                if key[pygame.K_SPACE]:
                     print("Clicks")
                     screen.blit(background,(0,0))
                     pipe_q = []
-                    pipe_q.append(pipeSet())
                     bird_rect.centerx = 100
                     bird_rect.centery = (config["screen_height"]/2)-25
                     reset = True
